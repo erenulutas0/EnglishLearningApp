@@ -79,7 +79,7 @@ class ApiService {
       englishWord: word.english,
       turkishMeaning: word.turkish,
       learnedDate: word.addedDate,
-      notes: word.notes || '',
+      notes: '',
       difficulty: word.difficulty || 'easy'
     };
     
@@ -98,6 +98,23 @@ class ApiService {
 
   async deleteWord(id: number): Promise<void> {
     return this.request<void>(`/words/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Sentence management methods
+  async addSentence(wordId: number, sentence: string, translation: string): Promise<Word> {
+    return this.request<Word>(`/words/${wordId}/sentences`, {
+      method: 'POST',
+      body: JSON.stringify({
+        sentence: sentence,
+        translation: translation
+      }),
+    });
+  }
+
+  async deleteSentence(wordId: number, sentenceId: number): Promise<Word> {
+    return this.request<Word>(`/words/${wordId}/sentences/${sentenceId}`, {
       method: 'DELETE',
     });
   }

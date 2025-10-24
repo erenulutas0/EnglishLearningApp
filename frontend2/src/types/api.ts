@@ -60,7 +60,6 @@ export interface CreateWordRequest {
   turkish: string;
   addedDate: string;
   difficulty?: 'easy' | 'medium' | 'difficult';
-  notes?: string;
 }
 
 export interface CreateSentenceRequest {

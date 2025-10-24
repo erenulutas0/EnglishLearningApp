@@ -2,23 +2,29 @@ import React, { useState } from "react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { Plus, BookOpen } from "lucide-react";
 import { apiService } from "../services/api";
+import { SentenceModal } from "./ui/sentence-modal";
 
 interface WordAdderProps {
   selectedDate: Date | undefined;
   onWordAdded?: () => void;
 }
 
+interface Sentence {
+  id: number;
+  english: string;
+  turkish: string;
+}
+
 export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
   const [englishWord, setEnglishWord] = useState("");
   const [turkishMeaning, setTurkishMeaning] = useState("");
-  const [notes, setNotes] = useState("");
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'difficult'>('easy');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [sentences, setSentences] = useState<Sentence[]>([]);
+  const [showSentenceModal, setShowSentenceModal] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +41,6 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
 
     setLoading(true);
     setError(null);
-    setSuccess(null);
 
     try {
       // Use local date formatting to avoid timezone issues
@@ -47,18 +52,23 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
       console.log('Selected date:', selectedDate);
       console.log('Date string being sent:', dateStr);
       
-      await apiService.createWord({
+      const savedWord = await apiService.createWord({
         english: englishWord.trim(),
         turkish: turkishMeaning.trim(),
         addedDate: dateStr,
-        difficulty: difficulty,
-        notes: notes.trim() || undefined
+        difficulty: difficulty
       });
 
-      setSuccess("Kelime başarıyla eklendi");
+      // Save sentences to database
+      if (sentences.length > 0 && savedWord.id) {
+        for (const sentence of sentences) {
+          await apiService.addSentence(savedWord.id, sentence.english, sentence.turkish);
+        }
+      }
+
       setEnglishWord("");
       setTurkishMeaning("");
-      setNotes("");
+      setSentences([]);
       
       if (onWordAdded) {
         onWordAdded();
@@ -69,6 +79,14 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddSentence = () => {
+    setShowSentenceModal(true);
+  };
+
+  const handleSaveSentences = (newSentences: Sentence[]) => {
+    setSentences(newSentences);
   };
 
   if (!selectedDate) {
@@ -99,12 +117,6 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
         </p>
       </div>
 
-      {/* Success Message */}
-      {success && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg">
-          <p className="text-green-800 dark:text-green-200 text-sm">{success}</p>
-        </div>
-      )}
 
       {/* Error Message */}
       {error && (
@@ -154,18 +166,19 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
           </select>
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            Notlar (Opsiyonel)
-          </label>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Kelime hakkında notlarınızı yazın..."
-            className="w-full"
-            rows={3}
-          />
+        {/* Add Sentence Button */}
+        <div className="flex items-center justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleAddSentence}
+            className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-indigo-300 dark:border-indigo-600 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Cümle Ekle
+          </Button>
         </div>
+
 
         {/* Submit Button */}
         <Button
@@ -176,6 +189,14 @@ export function WordAdder({ selectedDate, onWordAdded }: WordAdderProps) {
           {loading ? "Ekleniyor..." : "Kelimeyi Kaydet"}
         </Button>
       </form>
+
+      {/* Sentence Modal */}
+      <SentenceModal
+        isOpen={showSentenceModal}
+        onClose={() => setShowSentenceModal(false)}
+        onSave={handleSaveSentences}
+        existingSentences={sentences}
+      />
     </Card>
   );
 }
