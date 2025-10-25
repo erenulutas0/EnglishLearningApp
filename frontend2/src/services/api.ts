@@ -103,12 +103,13 @@ class ApiService {
   }
 
   // Sentence management methods
-  async addSentence(wordId: number, sentence: string, translation: string): Promise<Word> {
+  async addSentence(wordId: number, sentence: string, translation: string, difficulty?: string): Promise<Word> {
     return this.request<Word>(`/words/${wordId}/sentences`, {
       method: 'POST',
       body: JSON.stringify({
         sentence: sentence,
-        translation: translation
+        translation: translation,
+        difficulty: difficulty || 'easy'
       }),
     });
   }
@@ -230,6 +231,24 @@ class ApiService {
 
   async getSentenceStats(): Promise<ReviewStats> {
     return this.request<ReviewStats>('/sentences/stats');
+  }
+
+  // Add sentence practice (independent sentence)
+  async addSentencePractice(sentence: string, translation: string, difficulty: string): Promise<SentencePractice> {
+    return this.request<SentencePractice>('/sentences', {
+      method: 'POST',
+      body: JSON.stringify({
+        englishSentence: sentence,
+        turkishTranslation: translation,
+        difficulty: difficulty.toUpperCase(), // Backend enum expects uppercase
+        createdDate: new Date().toISOString().split('T')[0]
+      }),
+    });
+  }
+
+  // Get all sentences (both from words and independent practices)
+  async getAllSentences(): Promise<any[]> {
+    return this.request<any[]>('/sentences');
   }
 }
 

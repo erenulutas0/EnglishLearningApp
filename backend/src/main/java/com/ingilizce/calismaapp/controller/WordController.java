@@ -75,8 +75,9 @@ public class WordController {
     public ResponseEntity<Word> addSentence(@PathVariable Long wordId, @RequestBody Map<String, String> request) {
         String sentence = request.get("sentence");
         String translation = request.get("translation");
+        String difficulty = request.get("difficulty");
         
-        Word updatedWord = wordService.addSentence(wordId, sentence, translation);
+        Word updatedWord = wordService.addSentence(wordId, sentence, translation, difficulty);
         if (updatedWord != null) {
             return ResponseEntity.ok(updatedWord);
         }

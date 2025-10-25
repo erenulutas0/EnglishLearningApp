@@ -77,11 +77,11 @@ public class WordService {
     }
     
     // Sentence management methods
-    public Word addSentence(Long wordId, String sentence, String translation) {
+    public Word addSentence(Long wordId, String sentence, String translation, String difficulty) {
         Optional<Word> wordOpt = wordRepository.findById(wordId);
         if (wordOpt.isPresent()) {
             Word word = wordOpt.get();
-            Sentence newSentence = new Sentence(sentence, translation, word);
+            Sentence newSentence = new Sentence(sentence, translation, difficulty != null ? difficulty : "easy", word);
             word.addSentence(newSentence);
             return wordRepository.save(word);
         }

@@ -44,16 +44,36 @@ public class SentencePracticeController {
             allSentences.add(sentenceMap);
         }
         
-        // Get sentences from sentences table
-        List<Sentence> wordSentences = sentenceRepository.findAll();
+        // Get sentences from sentences table with word information
+        List<Sentence> wordSentences = sentenceRepository.findAllWithWord();
+        System.out.println("Found " + wordSentences.size() + " word sentences");
         for (Sentence s : wordSentences) {
+            System.out.println("Processing sentence: " + s.getSentence());
+            System.out.println("Difficulty: " + s.getDifficulty());
+            System.out.println("Word: " + (s.getWord() != null ? s.getWord().getEnglishWord() : "null"));
+            System.out.println("Word learned date: " + (s.getWord() != null ? s.getWord().getLearnedDate() : "null"));
+            
             Map<String, Object> sentenceMap = new HashMap<>();
             sentenceMap.put("id", "word_" + s.getId());
             sentenceMap.put("englishSentence", s.getSentence()); // Using 'sentence' column from sentences table
             sentenceMap.put("turkishTranslation", s.getTranslation());
-            sentenceMap.put("difficulty", "EASY"); // Default difficulty for word sentences
-            sentenceMap.put("createdDate", null);
+            String difficulty = s.getDifficulty();
+            if (difficulty == null || difficulty.trim().isEmpty()) {
+                difficulty = "easy";
+            } else {
+                difficulty = difficulty.toLowerCase();
+            }
+            sentenceMap.put("difficulty", difficulty);
+            sentenceMap.put("createdDate", s.getWord() != null ? s.getWord().getLearnedDate() : null); // Use word's learned date
             sentenceMap.put("source", "word");
+            // Add word information
+            if (s.getWord() != null) {
+                sentenceMap.put("word", s.getWord().getEnglishWord());
+                sentenceMap.put("wordTranslation", s.getWord().getTurkishMeaning());
+                System.out.println("Added word info: " + s.getWord().getEnglishWord() + " - " + s.getWord().getTurkishMeaning());
+            } else {
+                System.out.println("Word is null for sentence: " + s.getSentence());
+            }
             allSentences.add(sentenceMap);
         }
         
@@ -149,14 +169,17 @@ public class SentencePracticeController {
         long practiceMedium = sentencePracticeService.getSentenceCountByDifficulty(SentencePractice.DifficultyLevel.MEDIUM);
         long practiceHard = sentencePracticeService.getSentenceCountByDifficulty(SentencePractice.DifficultyLevel.HARD);
         
-        // Count from sentences table (all are considered EASY)
+        // Count from sentences table with actual difficulty
         long wordTotal = sentenceRepository.count();
+        long wordEasy = sentenceRepository.countByDifficulty("easy");
+        long wordMedium = sentenceRepository.countByDifficulty("medium");
+        long wordHard = sentenceRepository.countByDifficulty("hard");
         
         // Combine statistics
         long totalCount = practiceTotal + wordTotal;
-        long easyCount = practiceEasy + wordTotal; // All word sentences are EASY
-        long mediumCount = practiceMedium;
-        long hardCount = practiceHard;
+        long easyCount = practiceEasy + wordEasy;
+        long mediumCount = practiceMedium + wordMedium;
+        long hardCount = practiceHard + wordHard;
         
         return ResponseEntity.ok(new Object() {
             public final long total = totalCount;

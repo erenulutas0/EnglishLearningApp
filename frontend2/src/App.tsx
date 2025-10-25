@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Navigation } from "./components/Navigation";
 import { HomePage } from "./components/HomePage";
 import { WordsPage } from "./components/WordsPage";
@@ -8,28 +8,17 @@ import { Toaster } from "./components/ui/sonner";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<"home" | "words" | "sentences" | "generate">("home");
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem("theme");
-    return saved === "dark";
-  });
-
   useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [isDarkMode]);
+    // Always use dark mode
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  }, []);
 
   return (
     <div className="min-h-screen">
       <Navigation 
         currentPage={currentPage} 
         onPageChange={setCurrentPage}
-        isDarkMode={isDarkMode}
-        onToggleTheme={() => setIsDarkMode(!isDarkMode)}
       />
       
       {currentPage === "home" && (

@@ -17,17 +17,20 @@ public class Sentence {
     @Column
     private String translation;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column
+    private String difficulty;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "word_id", nullable = false)
-    @JsonBackReference
     private Word word;
     
     // Constructors
     public Sentence() {}
     
-    public Sentence(String sentence, String translation, Word word) {
+    public Sentence(String sentence, String translation, String difficulty, Word word) {
         this.sentence = sentence;
         this.translation = translation;
+        this.difficulty = difficulty;
         this.word = word;
     }
     
@@ -62,5 +65,13 @@ public class Sentence {
     
     public void setWord(Word word) {
         this.word = word;
+    }
+    
+    public String getDifficulty() {
+        return difficulty;
+    }
+    
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 }

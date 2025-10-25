@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Calendar as CalendarUI } from "./ui/calendar";
 import { Loader2 } from "lucide-react";
 import { apiService } from "../services/api";
+import { StatisticsWidget } from "./StatisticsWidget";
 
 interface CalendarProps {
   selectedDate: Date | undefined;
@@ -62,27 +63,40 @@ export function Calendar({ selectedDate, onDateSelect, refreshTrigger }: Calenda
         </p>
       </div>
 
-      {/* Calendar Content */}
-      {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+      {/* Calendar and Statistics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Calendar Content */}
+        <div className="lg:col-span-2 flex justify-center">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+            </div>
+          ) : (
+            <CalendarUI
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                onDateSelect(date);
+              }}
+              className="rounded-md dark:text-gray-200"
+              modifiers={{
+                hasWords: datesWithWords,
+              }}
+              modifiersClassNames={{
+                hasWords: "bg-indigo-100 dark:bg-indigo-900 font-bold text-indigo-900 dark:text-indigo-100 hover:bg-indigo-200 dark:hover:bg-indigo-800 relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-indigo-600 dark:after:bg-indigo-400 after:rounded-full",
+              }}
+            />
+          )}
         </div>
-      ) : (
-        <CalendarUI
-          mode="single"
-          selected={selectedDate}
-          onSelect={(date) => {
-            onDateSelect(date);
-          }}
-          className="rounded-md dark:text-gray-200"
-          modifiers={{
-            hasWords: datesWithWords,
-          }}
-          modifiersClassNames={{
-            hasWords: "bg-indigo-100 dark:bg-indigo-900 font-bold text-indigo-900 dark:text-indigo-100 hover:bg-indigo-200 dark:hover:bg-indigo-800 relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:bg-indigo-600 dark:after:bg-indigo-400 after:rounded-full",
-          }}
-        />
-      )}
+
+        {/* Statistics Widget */}
+        <div className="lg:col-span-1">
+          <StatisticsWidget 
+            selectedDate={selectedDate}
+            refreshTrigger={refreshTrigger}
+          />
+        </div>
+      </div>
     </div>
   );
 }

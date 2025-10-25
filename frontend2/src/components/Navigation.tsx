@@ -1,14 +1,11 @@
-import { Home, BookOpen, FileText, Wand2, Moon, Sun } from "lucide-react";
-import { Button } from "./ui/button";
+import { Home, BookOpen, FileText, Wand2 } from "lucide-react";
 
 interface NavigationProps {
   currentPage: "home" | "words" | "sentences" | "generate";
   onPageChange: (page: "home" | "words" | "sentences" | "generate") => void;
-  isDarkMode: boolean;
-  onToggleTheme: () => void;
 }
 
-export function Navigation({ currentPage, onPageChange, isDarkMode, onToggleTheme }: NavigationProps) {
+export function Navigation({ currentPage, onPageChange }: NavigationProps) {
   const navItems = [
     { id: "home" as const, label: "Anasayfa", icon: Home },
     { id: "words" as const, label: "Kelimeler", icon: BookOpen },
@@ -39,7 +36,7 @@ export function Navigation({ currentPage, onPageChange, isDarkMode, onToggleThem
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                       isActive
                         ? "bg-indigo-600 text-white shadow-md"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-800 hover:text-indigo-900 dark:hover:text-indigo-300"
+                        : "text-gray-300 hover:bg-gray-800 hover:text-indigo-300"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -48,15 +45,6 @@ export function Navigation({ currentPage, onPageChange, isDarkMode, onToggleThem
                 );
               })}
             </div>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onToggleTheme}
-              className="ml-2 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-gray-800 flex-shrink-0"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </Button>
           </div>
         </div>
       </div>
